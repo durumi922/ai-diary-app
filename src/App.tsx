@@ -1,12 +1,19 @@
 // App.tsx
-import DiaryInput from "./components/DiaryInput";
+import EmotionResult from "./components/EmotionResult";
+export default App;
 
-export default function App() {
+
+function App() {
+  const handleSelectEmoji = (emoji: string) => {
+    console.log("사용자가 고른 이모지:", emoji);
+  };
+
   return (
-    <main className="min-h-screen bg-pastelBlue flex flex-col items-center px-4">
-      <section className="w-full max-w-xl py-10">
-        <DiaryInput onSubmit={(text) => console.log("일기:", text)} />
-      </section>
+      <main className="min-h-screen bg-pastelBlue flex flex-col justify-center items-center px-4 py-10">      <EmotionResult
+        emotionText="당신은 오늘 여유롭고 편안한 하루를 보냈어요 🌼"
+        emojis={["😊", "🧘‍♀️", "🌷"]}
+        onSelect={handleSelectEmoji}
+      />
     </main>
   );
 }
