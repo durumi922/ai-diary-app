@@ -1,32 +1,38 @@
-// src/components/DiaryInput.tsx
 import { useState } from "react";
+import axios from "axios";
 
-export default function DiaryInput({ onSubmit }: { onSubmit: (text: string) => void }) {
-  const [text] = useState("");
+type Props = {
+  onSubmit: (emotion: string, emojis: string[]) => void;
+};
+
+export default function DiaryInput({ onSubmit }: Props) {
+  const [text, setText] = useState("");
+
+  const handleAnalyze = async () => {
+    try {
+      const res = await axios.post("http://localhost:8000/analyze", { text });
+      const { emotion, emojis } = res.data;
+      onSubmit(emotion, emojis);
+    } catch (err) {
+      console.error("분석 실패", err);
+      onSubmit("분석 실패", []);
+    }
+  };
 
   return (
-    <div className="w-full max-w-xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 mt-10">
-
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 text-center">
-        🌸 오늘의 감정 일기
-        </h2>
-
-        <textarea
-        className="w-full h-40 sm:h-48 p-4 rounded-2xl border border-gray-300 shadow-sm resize-none text-base sm:text-lg md:text-xl focus:outline-none focus:ring-2 focus:ring-pastelPink transition"
-        placeholder="오늘의 기분이나 있었던 일을 적어보세요 😊"
-        />
-
-
-        
-      <div className="flex justify-center sm:justify-end mt-4">
-        <button
-          disabled={!text.trim()}
-          onClick={() => onSubmit(text)}
-          className="bg-pastelPink hover:bg-pastelMint text-white text-sm sm:text-base font-semibold py-2 px-6 rounded-2xl shadow-md transition-all disabled:opacity-50"
-        >
-          감정 분석하기 ✨
-        </button>
-      </div>
-    </div>
+    <>
+      <textarea
+        className="w-full h-32 p-2 border rounded mb-4"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="오늘 하루를 일기로 작성해보세요..."
+      />
+      <button
+        onClick={handleAnalyze}
+        className="bg-pink-400 text-white px-4 py-2 rounded hover:bg-pink-500"
+      >
+        분석하기
+      </button>
+    </>
   );
 }

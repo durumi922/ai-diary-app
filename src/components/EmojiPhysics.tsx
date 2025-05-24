@@ -1,17 +1,17 @@
 import { useEffect, useRef } from "react";
 import Matter from "matter-js";
 
-const emojis = ["😊", "☕", "🌧️", "🐶", "📚", "🎵", "🌸"];
+type Props = {
+  emojis: string[];
+};
 
-export default function EmojiPhysics() {
+export default function EmojiPhysics({ emojis }: Props) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engine = useRef(Matter.Engine.create());
   const runner = useRef<Matter.Runner | null>(null);
 
   useEffect(() => {
     const container = sceneRef.current!;
-
-    // 캔버스 초기화 방지: 기존 캔버스 제거
     container.innerHTML = "";
 
     const render = Matter.Render.create({
@@ -21,16 +21,16 @@ export default function EmojiPhysics() {
         width: 400,
         height: 600,
         wireframes: false,
-        background: "#fefefe",
+        background: "transparent",
         pixelRatio: window.devicePixelRatio,
       },
     });
 
     const world = engine.current.world;
     Matter.World.clear(world, false);
-
     engine.current.gravity.y = 1;
 
+    // 바닥 + 벽 설정
     const ground = Matter.Bodies.rectangle(200, 590, 400, 20, {
       isStatic: true,
       restitution: 0.1,
@@ -42,6 +42,7 @@ export default function EmojiPhysics() {
       isStatic: true,
       render: { visible: false },
     });
+
     const rightWall = Matter.Bodies.rectangle(400, 300, 20, 600, {
       isStatic: true,
       render: { visible: false },
@@ -49,37 +50,38 @@ export default function EmojiPhysics() {
 
     Matter.World.add(world, [ground, leftWall, rightWall]);
 
-    const interval = setInterval(() => {
-      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-      const randomX = 50 + Math.random() * 300;
-      const body = Matter.Bodies.circle(randomX, -30, 24, {
-        restitution: 0.6,
-        friction: 0.2,
-        density: 0.01,
-        frictionAir: 0.02,
-        render: {
-          sprite: {
-            texture: createEmojiDataUrl(emoji),
-            xScale: 1,
-            yScale: 1,
+    // 전달된 이모지만 떨어지게!
+    emojis.forEach((emoji, index) => {
+      setTimeout(() => {
+        const randomX = 50 + Math.random() * 300;
+        const body = Matter.Bodies.circle(randomX, -30, 24, {
+          restitution: 0.6,
+          friction: 0.2,
+          density: 0.01,
+          frictionAir: 0.02,
+          render: {
+            sprite: {
+              texture: createEmojiDataUrl(emoji),
+              xScale: 1,
+              yScale: 1,
+            },
           },
-        },
-      });
-      Matter.World.add(world, body);
-    }, 1000);
+        });
+        Matter.World.add(world, body);
+      }, index * 500); // 이모지당 0.5초 간격으로 떨어짐
+    });
 
     runner.current = Matter.Runner.create();
     Matter.Runner.run(runner.current, engine.current);
     Matter.Render.run(render);
 
     return () => {
-      clearInterval(interval);
       Matter.Render.stop(render);
       Matter.Runner.stop(runner.current!);
       Matter.World.clear(world, false);
       Matter.Engine.clear(engine.current);
     };
-  }, []);
+  }, [emojis]);
 
   return (
     <div

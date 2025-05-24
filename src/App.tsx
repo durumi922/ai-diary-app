@@ -1,13 +1,18 @@
-
-import EmojiPhysics from "./components/EmojiPhysics";
+// src/App.tsx
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import DropPage from "./pages/DropPage";
+import NavBar from "./components/NavBar";
 
 function App() {
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">이모지 중력 효과</h1>
-
-      <EmojiPhysics />
-    </div>
+    <Router>
+      <NavBar />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/drop" element={<DropPage />} />
+      </Routes>
+    </Router>
   );
 }
 
